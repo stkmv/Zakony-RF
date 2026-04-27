@@ -1,0 +1,37 @@
+/**
+ * fines.js — справочник штрафов LawScan
+ * Источник: Zakony-RF.md, актуально на апрель 2026 г.
+ */
+module.exports = {
+  'no-privacy-policy':         { law: '152-ФЗ', article: 'ст. 13.11 ч.1 КоАП', fine_min: 150000,  fine_max: 300000   },
+  'no-form-consent':           { law: '152-ФЗ', article: 'ст. 13.11 ч.2 КоАП', fine_min: 300000,  fine_max: 700000   },
+  'consent-pre-checked':       { law: '152-ФЗ', article: 'ст. 13.11 ч.2 КоАП', fine_min: 300000,  fine_max: 700000   },
+  'template-privacy-policy':   { law: '152-ФЗ', article: 'ст. 13.11 ч.1 КоАП', fine_min: 150000,  fine_max: 300000   },
+  'no-cookie-banner':          { law: '152-ФЗ', article: 'ст. 13.11 ч.1 КоАП', fine_min: 150000,  fine_max: 300000   },
+  'no-cookie-reject-button':   { law: '152-ФЗ', article: 'ст. 13.11 ч.2 КоАП', fine_min: 300000,  fine_max: 700000   },
+  'analytics-before-consent':  { law: '152-ФЗ', article: 'ст. 13.11 ч.2 КоАП', fine_min: 300000,  fine_max: 700000   },
+  'google-analytics-detected': { law: '242-ФЗ', article: 'ст. 13.11 ч.9 КоАП', fine_min: 100000,  fine_max: 6000000  },
+  'meta-pixel-detected':       { law: '242-ФЗ', article: 'ст. 13.11 ч.9 КоАП', fine_min: 100000,  fine_max: 6000000  },
+  'google-recaptcha-detected': { law: '242-ФЗ', article: 'ст. 13.11 ч.9 КоАП', fine_min: 100000,  fine_max: 6000000  },
+  'google-fonts-cdn-detected': { law: '152-ФЗ', article: 'ст. 13.11 ч.1 КоАП', fine_min: 150000,  fine_max: 300000   },
+  'tiktok-analytics-detected': { law: '242-ФЗ', article: 'ст. 13.11 ч.9 КоАП', fine_min: 100000,  fine_max: 6000000  },
+  'hotjar-detected':           { law: '242-ФЗ', article: 'ст. 13.11 ч.9 КоАП', fine_min: 100000,  fine_max: 6000000  },
+  'linkedin-tag-detected':     { law: '242-ФЗ', article: 'ст. 13.11 ч.9 КоАП', fine_min: 100000,  fine_max: 6000000  },
+  'no-contacts':               { law: '149-ФЗ', article: 'ст. 9 149-ФЗ',        fine_min: 100000,  fine_max: 500000   },
+  'no-inn-ogrn':               { law: 'ЗоЗПП',  article: 'ст. 14.8 КоАП',       fine_min: 10000,   fine_max: 20000    },
+  'no-org-name':               { law: 'ЗоЗПП',  article: 'ст. 14.8 КоАП',       fine_min: 10000,   fine_max: 20000    },
+  'no-legal-address':          { law: 'ЗоЗПП',  article: 'ст. 14.8 КоАП',       fine_min: 10000,   fine_max: 20000    },
+  'ad-without-label':          { law: '38-ФЗ',  article: 'ст. 14.3 КоАП',       fine_min: 200000,  fine_max: 500000   },
+  'ad-without-erid':           { law: '38-ФЗ',  article: 'ст. 14.3 КоАП',       fine_min: 200000,  fine_max: 500000   },
+  'affiliate-without-label':   { law: '38-ФЗ',  article: 'ст. 14.3 КоАП',       fine_min: 200000,  fine_max: 500000   },
+  'no-ofd-link':               { law: '54-ФЗ',  article: 'ст. 14.5 КоАП',       fine_min: 30000,   fine_max: 40000    },
+  'no-check-mention':          { law: '54-ФЗ',  article: 'ст. 14.5 КоАП',       fine_min: 10000,   fine_max: 30000    },
+  'telegram-widget-detected':  { law: '41-ФЗ',  article: 'ст. 14.8 КоАП',       fine_min: 100000,  fine_max: 500000   },
+  'whatsapp-widget-detected':  { law: '41-ФЗ',  article: 'ст. 14.8 КоАП',       fine_min: 100000,  fine_max: 500000   },
+  'viber-widget-detected':     { law: '41-ФЗ',  article: 'ст. 14.8 КоАП',       fine_min: 100000,  fine_max: 500000   },
+  'facebook-instagram-detected':{ law: 'Meta',  article: 'УК РФ',               fine_min: 0,       fine_max: 0        },
+  'no-return-policy':          { law: 'ЗоЗПП',  article: 'ст. 26.1 ЗоЗПП',      fine_min: 10000,   fine_max: 30000    },
+  'no-delivery-info':          { law: 'ЗоЗПП',  article: 'ст. 26.1 ЗоЗПП',      fine_min: 10000,   fine_max: 20000    },
+  'subscription-no-cancel':    { law: 'ФЗ-376', article: 'ст. 26.1 ЗоЗПП',      fine_min: 50000,   fine_max: 100000   },
+  'prices-not-in-rubles':      { law: 'ЗоЗПП',  article: 'ст. 10 ЗоЗПП',        fine_min: 10000,   fine_max: 20000    },
+};

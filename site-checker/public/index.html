@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LawScan — Проверка сайта на штрафы РКН</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">⚖️ LawScan</div>
+    <div class="tagline">Проверка сайтов на нарушения законов РФ</div>
+  </header>
+
+  <section class="hero">
+    <h1 class="hero-title">Проверьте ваш сайт<br>на штрафы от РКН</h1>
+    <p class="hero-subtitle">Анализируем нарушения 8 законов РФ и считаем сумму штрафов за 60 секунд</p>
+    <div class="search-box">
+      <input type="url" id="urlInput" class="url-input" placeholder="https://ваш-сайт.ru" autocomplete="off">
+      <button id="checkBtn" class="check-btn" onclick="startCheck()">🔍 Проверить сайт</button>
+    </div>
+    <p class="disclaimer">Анализ носит информационный характер и не является юридической консультацией</p>
+  </section>
+
+  <section class="laws-section">
+    <h2 class="section-title">Что мы проверяем</h2>
+    <div class="laws-grid" id="lawsGrid"></div>
+  </section>
+
+  <section class="loading-section" id="loadingSection" style="display:none">
+    <div class="spinner"></div>
+    <div class="loading-url" id="loadingUrl"></div>
+    <div class="loading-text" id="loadingText">Загружаем страницу...</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </section>
+
+  <section class="results-section" id="resultsSection" style="display:none">
+    <div class="summary-box" id="summaryBox">
+      <div class="summary-count" id="summaryCount"></div>
+      <div class="summary-label" id="summaryLabel">Сумма штрафов под угрозой</div>
+      <div class="summary-amount" id="summaryAmount"></div>
+      <div class="summary-actions">
+        <button class="btn-secondary" onclick="resetForm()">← Проверить другой сайт</button>
+      </div>
+    </div>
+    <div id="violationsList"></div>
+    <div class="passed-section" id="passedSection" style="display:none">
+      <h3 class="passed-title">✅ Что в порядке</h3>
+      <div id="passedList"></div>
+    </div>
+  </section>
+
+  <section class="error-section" id="errorSection" style="display:none">
+    <div class="error-box">
+      <div class="error-icon">⚠️</div>
+      <div class="error-message" id="errorMessage"></div>
+      <button class="btn-secondary" onclick="resetForm()">Попробовать снова</button>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>LawScan — информационный сервис. Не является юридической консультацией.</p>
+    <p>Актуально на апрель 2026 г. · При изменении законодательства данные обновляются.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
