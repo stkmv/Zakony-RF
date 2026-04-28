@@ -8,6 +8,13 @@ module.exports = async function checkAdvertising(data) {
     let currentDomain = '';
     try { currentDomain = new URL(url).hostname.replace('www.', ''); } catch (e) {}
 
+    const SOCIAL_DOMAINS = [
+      'vk.com', 't.me', 'telegram.org', 'rutube.ru', 'dzen.ru', 'zen.yandex.ru',
+      'youtube.com', 'youtu.be', 'ok.ru', 'max.ru', 'my.mail.ru',
+      'instagram.com', 'facebook.com', 'twitter.com', 'x.com',
+      'linkedin.com', 'tiktok.com', 'pinterest.com'
+    ];
+
     const adBlocks = [];
     $('a[href]').each(function () {
       const el = $(this);
@@ -15,11 +22,15 @@ module.exports = async function checkAdvertising(data) {
       if (!href.startsWith('http')) return;
 
       let isExternal = false;
+      let linkDomain = '';
       try {
-        const ld = new URL(href).hostname.replace('www.', '');
-        isExternal = ld !== currentDomain && ld !== '';
+        linkDomain = new URL(href).hostname.replace('www.', '');
+        isExternal = linkDomain !== currentDomain && linkDomain !== '';
       } catch (e) { return; }
       if (!isExternal) return;
+
+      // Ссылки на собственные страницы компании в соцсетях — не реклама
+      if (SOCIAL_DOMAINS.some(sd => linkDomain === sd || linkDomain.endsWith('.' + sd))) return;
 
       const hasImg = el.find('img').length > 0;
       const cls = (el.attr('class') || '').toLowerCase();
