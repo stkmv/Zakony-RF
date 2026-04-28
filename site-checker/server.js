@@ -29,7 +29,15 @@ app.post('/api/check', async (req, res) => {
   try {
     browser = await puppeteer.launch({
       headless: 'new',
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+      executablePath: (() => {
+        if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
+        try {
+          const { execSync } = require('child_process');
+          const p = execSync('which chromium || which chromium-browser || which google-chrome-stable 2>/dev/null').toString().trim();
+          if (p) return p;
+        } catch(e) {}
+        return undefined;
+      })(),
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
