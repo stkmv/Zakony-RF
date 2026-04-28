@@ -34,4 +34,6 @@ module.exports = {
   'no-delivery-info':          { law: 'ЗоЗПП',  article: 'ст. 26.1 ЗоЗПП',      fine_min: 10000,   fine_max: 20000    },
   'subscription-no-cancel':    { law: 'ФЗ-376', article: 'ст. 26.1 ЗоЗПП',      fine_min: 50000,   fine_max: 100000   },
   'prices-not-in-rubles':      { law: 'ЗоЗПП',  article: 'ст. 10 ЗоЗПП',        fine_min: 10000,   fine_max: 20000    },
+  'anglicisms-latin-ui':       { law: '53-ФЗ',  article: 'ст. 3 53-ФЗ (ред. 2026)', fine_min: 30000, fine_max: 200000  },
+  'anglicisms-transliterated': { law: '53-ФЗ',  article: 'ст. 3 53-ФЗ (ред. 2026)', fine_min: 30000, fine_max: 100000  },
 };

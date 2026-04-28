@@ -7,6 +7,7 @@ const LAWS_DATA = [
   { icon: '🛒', title: '54-ФЗ Онлайн-касса', desc: 'ОФД при наличии оплаты, электронный чек покупателю', fine: '100% суммы' },
   { icon: '💬', title: '41-ФЗ Мессенджеры', desc: 'Виджеты Telegram, WhatsApp, Viber, ссылки на Meta', fine: 'до 500 000 ₽' },
   { icon: '🏪', title: 'ЗоЗПП Интернет-магазин', desc: 'Условия возврата, доставка, подписки, цены в рублях', fine: 'до 100 000 ₽' },
+  { icon: '🇷🇺', title: '53-ФЗ Русский язык', desc: 'Иностранные слова в навигации, кнопках и тексте сайта', fine: 'до 200 000 ₽' },
 ];
 
 const PROGRESS_MESSAGES = [
@@ -17,6 +18,7 @@ const PROGRESS_MESSAGES = [
   'Анализируем cookie-баннер...',
   'Проверяем реквизиты организации...',
   'Анализируем рекламные блоки...',
+  'Проверяем иностранные слова в тексте...',
   'Считаем сумму штрафов...',
 ];
 
@@ -187,6 +189,75 @@ function hideAll() {
 function formatMoney(n) {
   if (!n && n !== 0) return '?';
   return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(n);
+}
+
+async function downloadPDF() {
+  const btn = document.getElementById('downloadPdfBtn');
+  btn.textContent = '⏳ Формируем PDF...';
+  btn.disabled = true;
+
+  try {
+    if (!window.html2canvas) {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    }
+    if (!window.jspdf) {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    }
+
+    btn.style.visibility = 'hidden';
+
+    const section = document.getElementById('resultsSection');
+    const canvas = await html2canvas(section, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#f8fafc'
+    });
+
+    btn.style.visibility = '';
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const margin = 10;
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const contentW = pageW - margin * 2;
+    const contentH = (canvas.height * contentW) / canvas.width;
+    const totalPages = Math.ceil(contentH / (pageH - margin * 2));
+
+    for (let i = 0; i < totalPages; i++) {
+      if (i > 0) pdf.addPage();
+      pdf.addImage(
+        canvas.toDataURL('image/png'), 'PNG',
+        margin,
+        margin - i * (pageH - margin * 2),
+        contentW,
+        contentH
+      );
+    }
+
+    const rawUrl = document.getElementById('urlInput').value || 'site';
+    const host = rawUrl.replace(/https?:\/\//, '').replace(/[\/\\?#]/g, '_').slice(0, 30);
+    const date = new Date().toISOString().slice(0, 10);
+    pdf.save(`LawScan_${host}_${date}.pdf`);
+
+  } catch (err) {
+    alert('Не удалось создать PDF: ' + err.message);
+  } finally {
+    btn.textContent = '⬇ Скачать PDF';
+    btn.disabled = false;
+    btn.style.visibility = '';
+  }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('Не удалось загрузить: ' + src));
+    document.head.appendChild(s);
+  });
 }
 
 function esc(str) {

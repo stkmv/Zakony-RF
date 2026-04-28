@@ -12,6 +12,7 @@ const checkAdvertising = require('./checkers/advertising');
 const checkCashier = require('./checkers/cashier');
 const checkMessengers = require('./checkers/messengers');
 const checkEcommerce = require('./checkers/ecommerce');
+const checkAnglicisms = require('./checkers/anglicisms');
 
 const app = express();
 app.use(cors());
@@ -28,13 +29,16 @@ app.post('/api/check', async (req, res) => {
   try {
     browser = await puppeteer.launch({
       headless: 'new',
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--disable-blink-features=AutomationControlled',
-        '--window-size=1280,800'
+        '--window-size=1280,800',
+        '--single-process',
+        '--no-zygote'
       ]
     });
     const page = await browser.newPage();
@@ -63,7 +67,7 @@ app.post('/api/check', async (req, res) => {
 
     const data = { url, html, $, requests: interceptedRequests };
 
-    const [pd, cookies, loc, contacts, adv, cashier, mess, ecom] = await Promise.all([
+    const [pd, cookies, loc, contacts, adv, cashier, mess, ecom, angl] = await Promise.all([
       checkPersonalData(data),
       checkCookies(data),
       checkLocalization(data),
@@ -72,17 +76,18 @@ app.post('/api/check', async (req, res) => {
       checkCashier(data),
       checkMessengers(data),
       checkEcommerce(data),
+      checkAnglicisms(data),
     ]);
 
     const allViolations = [
       ...pd.violations, ...cookies.violations, ...loc.violations,
       ...contacts.violations, ...adv.violations, ...cashier.violations,
-      ...mess.violations, ...ecom.violations
+      ...mess.violations, ...ecom.violations, ...angl.violations
     ];
     const allPassed = [
       ...pd.passed, ...cookies.passed, ...loc.passed,
       ...contacts.passed, ...adv.passed, ...cashier.passed,
-      ...mess.passed, ...ecom.passed
+      ...mess.passed, ...ecom.passed, ...angl.passed
     ];
 
     allViolations.sort((a, b) => b.fine_max - a.fine_max);
@@ -109,7 +114,7 @@ app.post('/api/check', async (req, res) => {
   }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`LawScan сервер запущен: http://localhost:${PORT}`);
 });
