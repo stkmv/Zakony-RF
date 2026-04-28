@@ -4,8 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "node server.js",
-    "healthcheckPath": "/",
+    "startCommand": "PUPPETEER_EXECUTABLE_PATH=$(which chromium) node server.js",
     "restartPolicyType": "ON_FAILURE"
   }
 }
