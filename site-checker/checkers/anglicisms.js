@@ -79,7 +79,9 @@ module.exports = async function checkAnglicisms({ $ }) {
   const violations = [];
   const passed = [];
 
-  const bodyText = $('body').text();
+  const $body = $('body').clone();
+  $body.find('script, style, noscript').remove();
+  const bodyText = $body.text();
   const cyrillicCount = (bodyText.match(/[а-яёА-ЯЁ]/g) || []).length;
   const latinCount    = (bodyText.match(/[a-zA-Z]/g) || []).length;
 
