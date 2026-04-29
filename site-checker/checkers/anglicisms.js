@@ -108,7 +108,11 @@ module.exports = async function checkAnglicisms({ $ }) {
 
   $(UI_SELECTORS.join(', ')).each((_, el) => {
     const cls = ($(el).attr('class') || '').toLowerCase();
-    if (SLIDER_CLASSES.some(k => cls.includes(k))) return;
+    const ancestorCls = $(el).parents().toArray()
+      .map(p => ($(p).attr('class') || '').toLowerCase())
+      .join(' ');
+    const allCls = cls + ' ' + ancestorCls;
+    if (SLIDER_CLASSES.some(k => allCls.includes(k))) return;
     const text = $(el).text().trim();
     if (text && text.length > 0 && text.length < 80) {
       uiTexts.push(text.toLowerCase());
