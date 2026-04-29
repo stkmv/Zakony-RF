@@ -12,7 +12,12 @@ module.exports = async function checkAdvertising(data) {
       'vk.com', 't.me', 'telegram.org', 'rutube.ru', 'dzen.ru', 'zen.yandex.ru',
       'youtube.com', 'youtu.be', 'ok.ru', 'max.ru', 'my.mail.ru',
       'instagram.com', 'facebook.com', 'twitter.com', 'x.com',
-      'linkedin.com', 'tiktok.com', 'pinterest.com'
+      'linkedin.com', 'tiktok.com', 'pinterest.com',
+      // бизнес-каталоги, карты, сайты отзывов — не реклама
+      'yandex.ru', 'yandex.com', '2gis.ru', 'zoon.ru', 'flamp.ru',
+      'avito.ru', 'hh.ru', 'superjob.ru', 'rabota.ru', 'google.com', 'google.ru',
+      'maps.google.com', 'otzovik.com', 'irecommend.ru', 'prodoctorov.ru',
+      'gosuslugi.ru', 'nalog.gov.ru', 'egrul.nalog.ru'
     ];
 
     const adBlocks = [];
@@ -36,7 +41,7 @@ module.exports = async function checkAdvertising(data) {
       const cls = (el.attr('class') || '').toLowerCase();
       const id = (el.attr('id') || '').toLowerCase();
       const isAdAttr = ['banner', 'ad-', '-ad', 'adv', 'sponsor', 'promo'].some(k => cls.includes(k) || id.includes(k));
-      const isAffiliate = ['utm_source=', 'utm_medium=cpc', 'ref=', 'aff=', 'affiliate'].some(k => href.includes(k));
+      const isAffiliate = ['utm_medium=cpc', 'utm_medium=paid', 'utm_medium=banner', 'aff=', 'affiliate'].some(k => href.includes(k));
 
       if (hasImg || isAdAttr || isAffiliate) adBlocks.push({ el, href, hasImg, isAffiliate });
     });
