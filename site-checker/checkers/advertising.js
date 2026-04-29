@@ -18,7 +18,9 @@ module.exports = async function checkAdvertising(data) {
       'yandex.ru', 'yandex.com', '2gis.ru', 'zoon.ru', 'flamp.ru',
       'avito.ru', 'hh.ru', 'superjob.ru', 'rabota.ru', 'google.com', 'google.ru',
       'maps.google.com', 'otzovik.com', 'irecommend.ru', 'prodoctorov.ru',
-      'gosuslugi.ru', 'nalog.gov.ru', 'egrul.nalog.ru'
+      'gosuslugi.ru', 'nalog.gov.ru', 'egrul.nalog.ru',
+      // cookie-consent сервисы — не реклама
+      'cookieyes.com', 'cookiebot.com', 'onetrust.com', 'iubenda.com', 'termly.io', 'usercentrics.com'
     ];
 
     const adBlocks = [];
@@ -46,8 +48,6 @@ module.exports = async function checkAdvertising(data) {
 
       if (hasImg || isAdAttr || isAffiliate) adBlocks.push({ el, href, hasImg, isAffiliate });
     });
-
-    console.log('[ad-debug] adBlocks:', adBlocks.map(b => ({ href: b.href, hasImg: b.hasImg, isAffiliate: b.isAffiliate })));
 
     if (adBlocks.length === 0) {
       passed.push({ id: 'no-ads-detected', title: 'Рекламные блоки не обнаружены', description: 'На странице не найдены внешние рекламные баннеры или партнёрские ссылки, требующие маркировки ERID.' });
