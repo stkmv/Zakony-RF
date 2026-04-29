@@ -3,14 +3,54 @@ module.exports = async function checkContacts(data) {
   const passed = [];
 
   try {
-    const { $, html = '' } = data;
+    const { $, html = '', url = '' } = data;
     const text = $.text();
 
-    // Проверка 1: email или телефон
-    const hasEmail = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(text) || /mailto:/i.test(html);
-    const hasPhone = /(\+7|8)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}/.test(text) || /tel:/i.test(html);
+    function extractInfo(t) {
+      return {
+        hasEmail:   /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(t) || /mailto:/i.test(t),
+        hasPhone:   /(\+7|8)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}/.test(t) || /tel:/i.test(t),
+        hasInn:     /ИНН[\s:]*\d{10,12}/i.test(t) || /\b\d{10}\b/.test(t),
+        hasOgrn:    /ОГРН[\s:]*\d{13,15}/i.test(t),
+        hasOrgName: ['ООО', 'АО ', 'ПАО', 'ЗАО', 'ОАО', 'НКО', ' ИП '].some(k => t.includes(k)),
+        hasAddress: ['г.', 'ул.', 'пр-т', 'проспект', 'переулок', 'пер.', 'д.', 'офис', 'корп.'].some(m => t.includes(m)),
+      };
+    }
 
-    if (!hasEmail && !hasPhone) {
+    const cur = extractInfo(text);
+
+    // Если чего-то не нашли — пробуем подгрузить страницу контактов
+    const needsFallback = !cur.hasInn || !cur.hasOgrn || !cur.hasOrgName || !cur.hasAddress;
+    const isContactsPage = /\/(kontakt|contact|o-kompanii|about|rekvizit)/i.test(url);
+
+    let fb = null;
+    let fbUrl = '';
+
+    if (needsFallback && !isContactsPage) {
+      try {
+        const base = new URL(url);
+        const candidates = ['/kontakty/', '/contacts/', '/kontakt/', '/o-kompanii/', '/rekvizity/'];
+        for (const p of candidates) {
+          try {
+            const resp = await fetch(base.origin + p, {
+              headers: { 'User-Agent': 'Mozilla/5.0' },
+              signal: AbortSignal.timeout(5000)
+            });
+            if (resp.ok) {
+              fb = extractInfo(await resp.text());
+              fbUrl = p;
+              break;
+            }
+          } catch (e) {}
+        }
+      } catch (e) {}
+    }
+
+    const onContacts = (field) => fb && fb[field];
+    const foundAt = (field) => cur[field] ? '' : onContacts(field) ? ` Информация не указана на текущей странице, но найдена в разделе «Контакты».` : '';
+
+    // --- Проверка 1: email или телефон ---
+    if (!cur.hasEmail && !cur.hasPhone) {
       violations.push({
         id: 'no-contacts',
         severity: 'critical',
@@ -26,9 +66,9 @@ module.exports = async function checkContacts(data) {
       passed.push({ id: 'has-contacts', title: 'Контактные данные найдены', description: 'На сайте обнаружены контактные данные (email или телефон).' });
     }
 
-    // Проверка 2: ИНН / ОГРН
-    const hasInn = /ИНН[\s:]*\d{10,12}/i.test(text) || /\b\d{10}\b/.test(text);
-    const hasOgrn = /ОГРН[\s:]*\d{13,15}/i.test(text);
+    // --- Проверка 2: ИНН / ОГРН ---
+    const hasInn  = cur.hasInn  || onContacts('hasInn');
+    const hasOgrn = cur.hasOgrn || onContacts('hasOgrn');
 
     if (!hasInn && !hasOgrn) {
       violations.push({
@@ -43,11 +83,12 @@ module.exports = async function checkContacts(data) {
         how_to_fix: 'Добавьте в раздел «О компании» или в подвал: ИНН, ОГРН/ОГРНИП и полное наименование организации.'
       });
     } else {
-      passed.push({ id: 'has-inn-ogrn', title: 'ИНН/ОГРН найдены', description: 'На сайте обнаружены регистрационные данные организации.' });
+      const note = foundAt('hasInn') || foundAt('hasOgrn');
+      passed.push({ id: 'has-inn-ogrn', title: 'ИНН/ОГРН найдены', description: `На сайте обнаружены регистрационные данные организации.${note}` });
     }
 
-    // Проверка 3: Наименование организации
-    const hasOrgName = ['ООО', 'АО ', 'ПАО', 'ЗАО', 'ОАО', 'НКО', ' ИП '].some(k => text.includes(k));
+    // --- Проверка 3: Наименование организации ---
+    const hasOrgName = cur.hasOrgName || onContacts('hasOrgName');
 
     if (!hasOrgName) {
       violations.push({
@@ -62,11 +103,12 @@ module.exports = async function checkContacts(data) {
         how_to_fix: 'Укажите в подвале или на странице «О компании»: полное наименование ООО/ИП, ИНН, юридический адрес.'
       });
     } else {
-      passed.push({ id: 'has-org-name', title: 'Наименование организации найдено', description: 'На сайте обнаружено наименование юридического лица или ИП.' });
+      const note = foundAt('hasOrgName');
+      passed.push({ id: 'has-org-name', title: 'Наименование организации найдено', description: `На сайте обнаружено наименование юридического лица или ИП.${note}` });
     }
 
-    // Проверка 4: Юридический адрес
-    const hasAddress = ['г.', 'ул.', 'пр-т', 'проспект', 'переулок', 'пер.', 'д.', 'офис', 'корп.'].some(m => text.includes(m));
+    // --- Проверка 4: Юридический адрес ---
+    const hasAddress = cur.hasAddress || onContacts('hasAddress');
 
     if (!hasAddress) {
       violations.push({
@@ -81,7 +123,8 @@ module.exports = async function checkContacts(data) {
         how_to_fix: 'Укажите юридический адрес в разделе «Реквизиты», «Контакты» или в подвале сайта.'
       });
     } else {
-      passed.push({ id: 'has-address', title: 'Адрес организации найден', description: 'На сайте обнаружен адрес организации.' });
+      const note = foundAt('hasAddress');
+      passed.push({ id: 'has-address', title: 'Адрес организации найден', description: `На сайте обнаружен адрес организации.${note}` });
     }
 
   } catch (err) {
