@@ -104,7 +104,11 @@ module.exports = async function checkAnglicisms({ $ }) {
     '[class*="btn"]', '.btn'
   ];
 
+  const SLIDER_CLASSES = ['slick', 'swiper', 'owl-', 'carousel', 'splide', 'glide'];
+
   $(UI_SELECTORS.join(', ')).each((_, el) => {
+    const cls = ($(el).attr('class') || '').toLowerCase();
+    if (SLIDER_CLASSES.some(k => cls.includes(k))) return;
     const text = $(el).text().trim();
     if (text && text.length > 0 && text.length < 80) {
       uiTexts.push(text.toLowerCase());
