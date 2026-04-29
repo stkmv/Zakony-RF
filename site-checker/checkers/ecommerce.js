@@ -3,20 +3,58 @@ module.exports = async function checkEcommerce(data) {
   const passed = [];
 
   try {
-    const { $ } = data;
-    const text = $.text().toLowerCase();
+    const { $, requests = [] } = data;
 
-    // Определяем e-commerce сайт
+    const $body = $('body').clone();
+    $body.find('script, style, noscript').remove();
+    const text = $body.text().toLowerCase();
+    const html = (data.html || '').toLowerCase();
+
+    // --- Определяем настоящий интернет-магазин ---
+    // Нужно минимум 2 сильных признака
+
     let signals = 0;
-    if (['купить', 'оплатить', 'заказать', 'корзина', 'cart', 'checkout'].some(k => text.includes(k))) signals++;
-    if (['товар', 'продукт', 'цена', 'стоимость', '₽', 'руб.', 'рублей'].some(k => text.includes(k))) signals++;
-    if (['доставка', 'отправка', 'курьер', 'почта', 'cdek', 'сдэк'].some(k => text.includes(k))) signals++;
-    if (['каталог', 'категории', 'фильтр', 'артикул'].some(k => text.includes(k))) signals++;
+
+    // Признак 1: кнопка «В корзину» / «Добавить в корзину»
+    const btnTexts = $('button, a, input[type="submit"]').toArray()
+      .map(el => $(el).text().toLowerCase());
+    const hasCartBtn = btnTexts.some(t =>
+      ['в корзину', 'добавить в корзину', 'купить сейчас', 'add to cart'].some(k => t.includes(k))
+    );
+    if (hasCartBtn) signals++;
+
+    // Признак 2: элементы корзины в HTML (классы/id)
+    const hasCartElement = $('[class*="cart"], [class*="basket"], [id*="cart"], [id*="basket"], [class*="корзин"]').length > 0;
+    if (hasCartElement) signals++;
+
+    // Признак 3: платформа интернет-магазина
+    const SHOP_PLATFORMS = [
+      'bitrix', 'opencart', 'woocommerce', 'shopify', 'ecwid',
+      '1c-bitrix', 'prestashop', 'magento', 'tilda.ws/tildashop'
+    ];
+    if (SHOP_PLATFORMS.some(p => html.includes(p) || requests.some(r => r.includes(p)))) signals++;
+
+    // Признак 4: служба доставки физических товаров + цены
+    const hasDeliveryService = ['сдэк', 'cdek', 'boxberry', 'боксберри', 'dhl', 'почта россии',
+      'яндекс.доставка', 'яндекс доставка'].some(k => text.includes(k));
+    const hasPrices = ($('[class*="price"], [class*="цена"], [class*="cost"]').length > 2) ||
+                      (text.match(/\d+\s*[₽р]/g) || []).length > 3;
+    if (hasDeliveryService && hasPrices) signals++;
+
+    // Признак 5: карточки товаров (структурированный каталог)
+    const hasProductCards = $('[class*="product"], [class*="item"], [class*="товар"]').length > 3;
+    if (hasProductCards && hasPrices) signals++;
 
     if (signals < 2) {
-      passed.push({ id: 'not-ecommerce', title: 'Интернет-магазин не обнаружен', description: 'Признаки интернет-магазина не найдены. Специальные требования ЗоЗПП для электронной торговли не применяются.' });
+      passed.push({
+        id: 'not-ecommerce',
+        title: 'Интернет-магазин не обнаружен',
+        description: 'Признаки интернет-магазина не найдены. Специальные требования ЗоЗПП для электронной торговли не применяются.'
+      });
       return { violations, passed };
     }
+
+    // --- Проверки для интернет-магазина ---
 
     // Условия возврата
     if (!['возврат', 'обмен товара', '7 дней', '14 дней', '90 дней', 'возврат товара'].some(k => text.includes(k))) {
@@ -70,7 +108,7 @@ module.exports = async function checkEcommerce(data) {
     }
 
     // Цены в иностранной валюте
-    const rawText = $.text();
+    const rawText = $body.text();
     if (/\d[\d\s]*[$€£]|[$€£]\s*\d|\d[\d\s]*(USD|EUR|GBP)/i.test(rawText)) {
       if (!text.includes('₽') && !text.includes('руб')) {
         violations.push({
