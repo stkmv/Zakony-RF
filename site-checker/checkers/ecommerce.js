@@ -38,11 +38,13 @@ module.exports = async function checkEcommerce(data) {
     const hasDeliveryService = ['сдэк', 'cdek', 'boxberry', 'боксберри', 'dhl', 'почта россии',
       'яндекс.доставка', 'яндекс доставка'].some(k => text.includes(k));
     const hasPrices = ($('[class*="price"], [class*="цена"], [class*="cost"]').length > 2) ||
-                      (text.match(/\d+\s*[₽р]/g) || []).length > 3;
+                      (text.match(/\d+\s*₽/g) || []).length > 3 ||
+                      (text.match(/\d+\s*руб[.\s]/g) || []).length > 3;
     if (hasDeliveryService && hasPrices) signals++;
 
     // Признак 5: карточки товаров (структурированный каталог)
-    const hasProductCards = $('[class*="product"], [class*="item"], [class*="товар"]').length > 3;
+    // [class*="item"] намеренно исключён — слишком широкий (menu-item, nav-item и т.п.)
+    const hasProductCards = $('[class*="product"], [class*="товар"]').length > 3;
     if (hasProductCards && hasPrices) signals++;
 
     if (signals < 2) {
