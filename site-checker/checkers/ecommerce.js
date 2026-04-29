@@ -47,14 +47,7 @@ module.exports = async function checkEcommerce(data) {
     const hasProductCards = $('[class*="product"], [class*="товар"]').length > 3;
     if (hasProductCards && hasPrices) signals++;
 
-    // [DEBUG] временный вывод — покажет какие сигналы сработали
-    passed.push({
-      id: 'ecommerce-debug',
-      title: `[DEBUG] Ecommerce сигналы: ${signals}/5`,
-      description: `cart_btn=${hasCartBtn} | cart_element=${hasCartElement} | platform=${SHOP_PLATFORMS.some(p => html.includes(p) || requests.some(r => r.includes(p)))} | delivery=${hasDeliveryService} | prices=${hasPrices} | product_cards=${hasProductCards}`
-    });
-
-    if (signals < 2) {
+    if (signals < 3) {
       passed.push({
         id: 'not-ecommerce',
         title: 'Интернет-магазин не обнаружен',
