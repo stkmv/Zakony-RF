@@ -110,7 +110,7 @@ module.exports = async function checkAnglicisms({ $ }) {
   $(UI_SELECTORS.join(', ')).each((_, el) => {
     const cls = ($(el).attr('class') || '').trim().toLowerCase();
     // кнопки без класса — авто-генерированные JS-плагинами (слайдеры, виджеты)
-    if (el.tagName === 'BUTTON' && !cls) return;
+    if ($(el).is('button') && !cls) return;
     const ancestorCls = $(el).parents().toArray()
       .map(p => ($(p).attr('class') || '').toLowerCase())
       .join(' ');
