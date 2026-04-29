@@ -9,10 +9,11 @@ module.exports = async function checkAdvertising(data) {
     try { currentDomain = new URL(url).hostname.replace('www.', ''); } catch (e) {}
 
     const SOCIAL_DOMAINS = [
-      'vk.com', 't.me', 'telegram.org', 'rutube.ru', 'dzen.ru', 'zen.yandex.ru',
+      'vk.com', 't.me', 'telegram.org', 'tlgg.ru', 'rutube.ru', 'dzen.ru', 'zen.yandex.ru',
       'youtube.com', 'youtu.be', 'ok.ru', 'max.ru', 'my.mail.ru',
       'instagram.com', 'facebook.com', 'twitter.com', 'x.com',
       'linkedin.com', 'tiktok.com', 'pinterest.com',
+      'wa.me', 'whatsapp.com', 'viber.com', 'viber.click', 'skype.com',
       // бизнес-каталоги, карты, сайты отзывов — не реклама
       'yandex.ru', 'yandex.com', '2gis.ru', 'zoon.ru', 'flamp.ru',
       'avito.ru', 'hh.ru', 'superjob.ru', 'rabota.ru', 'google.com', 'google.ru',
