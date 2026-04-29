@@ -21,7 +21,9 @@ module.exports = async function checkContacts(data) {
 
     // Если чего-то не нашли — пробуем подгрузить страницу контактов
     const needsFallback = !cur.hasInn || !cur.hasOgrn || !cur.hasOrgName || !cur.hasAddress;
-    const isContactsPage = /\/(kontakt|contact|o-kompanii|about|rekvizit)/i.test(url);
+    const urlPath = (() => { try { return new URL(url).pathname; } catch(e) { return url; } })();
+    const lastSegment = urlPath.split('/').filter(Boolean).pop() || '';
+    const isContactsPage = /^(kontakt|contact|o-kompanii|about|rekvizit)/i.test(lastSegment);
 
     let fb = null;
     let fbUrl = '';
