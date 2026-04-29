@@ -97,7 +97,6 @@ module.exports = async function checkAnglicisms({ $ }) {
 
   // --- Проверка 1: Латинские слова в UI-элементах ---
   const uiTexts = [];
-  const uiDebug = [];
   const UI_SELECTORS = [
     'nav a', 'header a', '.menu a', '[class*="nav"] a', '[class*="menu"] a',
     'button', 'input[type="submit"]', 'input[type="button"]',
@@ -119,7 +118,6 @@ module.exports = async function checkAnglicisms({ $ }) {
     const text = $(el).text().trim();
     if (text && text.length > 0 && text.length < 80) {
       uiTexts.push(text.toLowerCase());
-      uiDebug.push({ tag: el.tagName, cls: ($(el).attr('class') || ''), text });
     }
   });
 
@@ -137,15 +135,13 @@ module.exports = async function checkAnglicisms({ $ }) {
     const isCritical = foundLatinWords.length >= 3;
     const wordList = foundLatinWords.map(w => `«${w.word}»`).join(', ');
     const fixList  = foundLatinWords.slice(0, 5).map(w => `«${w.word}» → «${w.replace}»`).join('; ');
-    const debugMatched = uiDebug.filter(d => foundLatinWords.some(w => new RegExp(`\\b${w.word}\\b`, 'i').test(d.text)));
-    const debugInfo = debugMatched.slice(0, 3).map(d => `<${d.tag} class="${d.cls}">${d.text}</${d.tag}>`).join(' | ');
     violations.push({
       id: 'anglicisms-latin-ui',
       severity: isCritical ? 'critical' : 'warning',
       law: '53-ФЗ',
       article: 'ст. 3 53-ФЗ (ред. 2026)',
       title: `Иностранные слова в интерфейсе: ${foundLatinWords.length} ${pluralWords(foundLatinWords.length)}`,
-      description: `Найдены латинские слова в навигации, заголовках и кнопках: ${wordList}. С 2026 года при наличии русских эквивалентов использование иностранных слов в публичном пространстве ограничено законом. [DEBUG: ${debugInfo}]`,
+      description: `Найдены латинские слова в навигации, заголовках и кнопках: ${wordList}. С 2026 года при наличии русских эквивалентов использование иностранных слов в публичном пространстве ограничено законом.`,
       fine_min: isCritical ? 50000 : 30000,
       fine_max: isCritical ? 200000 : 100000,
       how_to_fix: `Замените на русские аналоги: ${fixList}.`
