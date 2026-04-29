@@ -47,6 +47,8 @@ module.exports = async function checkAdvertising(data) {
       if (hasImg || isAdAttr || isAffiliate) adBlocks.push({ el, href, hasImg, isAffiliate });
     });
 
+    console.log('[ad-debug] adBlocks:', adBlocks.map(b => ({ href: b.href, hasImg: b.hasImg, isAffiliate: b.isAffiliate })));
+
     if (adBlocks.length === 0) {
       passed.push({ id: 'no-ads-detected', title: 'Рекламные блоки не обнаружены', description: 'На странице не найдены внешние рекламные баннеры или партнёрские ссылки, требующие маркировки ERID.' });
       return { violations, passed };
