@@ -108,7 +108,9 @@ module.exports = async function checkAnglicisms({ $ }) {
   const SLIDER_CLASSES = ['slick', 'swiper', 'owl-', 'carousel', 'splide', 'glide'];
 
   $(UI_SELECTORS.join(', ')).each((_, el) => {
-    const cls = ($(el).attr('class') || '').toLowerCase();
+    const cls = ($(el).attr('class') || '').trim().toLowerCase();
+    // кнопки без класса — авто-генерированные JS-плагинами (слайдеры, виджеты)
+    if (el.tagName === 'BUTTON' && !cls) return;
     const ancestorCls = $(el).parents().toArray()
       .map(p => ($(p).attr('class') || '').toLowerCase())
       .join(' ');
