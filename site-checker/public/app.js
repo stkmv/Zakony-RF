@@ -72,6 +72,7 @@ async function startCheck() {
 function showLoading(url) {
   hideAll();
   document.getElementById('loadingSection').style.display = 'block';
+  document.getElementById('loadingSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
   document.getElementById('loadingUrl').textContent = url;
 
   let msgIdx = 0;
