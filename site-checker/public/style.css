@@ -1,18 +1,18 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #f8fafc;
+  --bg: #ffffff;
   --card: #ffffff;
-  --card-hover: #f1f5f9;
-  --border: #e2e8f0;
-  --accent: #f97316;
-  --accent-hover: #ea6a0a;
-  --red: #dc2626;
+  --card-hover: #fdf2f2;
+  --border: #e5e5e5;
+  --accent: #c0392b;
+  --accent-hover: #a93226;
+  --red: #c0392b;
   --yellow: #d97706;
   --green: #16a34a;
-  --text: #0f172a;
-  --text-muted: #475569;
-  --text-dim: #94a3b8;
+  --text: #1a1a1a;
+  --text-muted: #555555;
+  --text-dim: #999999;
 }
 
 body {
@@ -29,19 +29,22 @@ body {
   align-items: center;
   gap: 12px;
   padding: 16px 24px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(248,250,252,0.95);
+  border-bottom: 2px solid var(--accent);
+  background: #ffffff;
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .logo {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--accent);
-  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 48px;
+  width: auto;
 }
 
 .tagline {
@@ -55,6 +58,7 @@ body {
   margin: 0 auto;
   padding: 80px 24px 60px;
   text-align: center;
+  background: #ffffff;
 }
 
 .hero-title {
