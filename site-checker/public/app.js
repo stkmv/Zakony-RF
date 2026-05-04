@@ -56,16 +56,28 @@ async function startCheck() {
 
   showLoading(url);
   try {
-    const res = await fetch('/api/check', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
-    });
-    const data = await res.json();
+    let res, data;
+    const maxAttempts = 4;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        res = await fetch('/api/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        data = await res.json();
+        break;
+      } catch (fetchErr) {
+        if (attempt === maxAttempts) throw fetchErr;
+        document.getElementById('loadingText').textContent =
+          `Сервер просыпается... попытка ${attempt + 1} из ${maxAttempts}`;
+        await new Promise(r => setTimeout(r, 8000));
+      }
+    }
     if (!res.ok || data.error) { showError(data.error || 'Не удалось проверить сайт'); return; }
     showResults(data);
   } catch (err) {
-    showError('Ошибка соединения с сервером: ' + err.message);
+    showError('Сервер не отвечает. Подождите 30 секунд и попробуйте снова.');
   }
 }
 
