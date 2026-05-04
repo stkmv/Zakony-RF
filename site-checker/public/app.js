@@ -123,14 +123,24 @@ function showResults(data) {
     boxEl.classList.add('summary-danger');
   }
 
+  window._lastResults = data;
+  document.getElementById('passedSection').style.display = 'none';
+  document.getElementById('gateSection').style.display = 'none';
+
   const violList = document.getElementById('violationsList');
+  violList.classList.remove('violations-locked');
+
   if (data.violations.length > 0) {
     violList.innerHTML = '<h3 class="violations-title">🚨 Найденные нарушения</h3>' +
       data.violations.map(renderViolation).join('');
+    violList.classList.add('violations-locked');
+    document.getElementById('gateSubtitle').textContent =
+      `В отчёте ${data.violations.length} нарушений и рекомендации по исправлению каждого. Получите полный анализ бесплатно.`;
+    document.getElementById('gateSection').style.display = 'block';
   }
 
-  const passedList = document.getElementById('passedList');
-  if (data.passed.length > 0) {
+  if (count === 0 && data.passed.length > 0) {
+    const passedList = document.getElementById('passedList');
     passedList.innerHTML = data.passed.map(p => `
       <div class="passed-item">
         <span class="passed-icon">✓</span>
@@ -176,9 +186,34 @@ function resetForm() {
   document.getElementById('summaryBox').classList.remove('summary-danger', 'summary-ok');
   document.getElementById('summaryLabel').style.display = '';
   document.getElementById('violationsList').innerHTML = '';
+  document.getElementById('violationsList').classList.remove('violations-locked');
   document.getElementById('passedList').innerHTML = '';
+  document.getElementById('passedSection').style.display = 'none';
   document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('gateSection').style.display = 'none';
+  window._lastResults = null;
+  window._leadCaptured = false;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function unlockResults() {
+  document.getElementById('violationsList').classList.remove('violations-locked');
+  document.getElementById('gateSection').style.display = 'none';
+  const data = window._lastResults;
+  if (data && data.passed.length > 0) {
+    const passedList = document.getElementById('passedList');
+    passedList.innerHTML = data.passed.map(p => `
+      <div class="passed-item">
+        <span class="passed-icon">✓</span>
+        <div>
+          <div class="passed-item-title">${esc(p.title)}</div>
+          <div class="passed-item-desc">${esc(p.description)}</div>
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('passedSection').style.display = 'block';
+  }
+  window._leadCaptured = true;
 }
 
 function hideAll() {
@@ -193,6 +228,7 @@ function formatMoney(n) {
 }
 
 function downloadPDF() {
+  if (window._leadCaptured) { generateAndDownloadPDF(); return; }
   document.getElementById('leadName').value = '';
   document.getElementById('leadPhone').value = '';
   document.getElementById('leadError').style.display = 'none';
@@ -242,6 +278,7 @@ async function submitLead() {
   btn.textContent = 'Получить отчёт ⬇';
   btn.disabled = false;
 
+  unlockResults();
   await generateAndDownloadPDF();
 }
 

@@ -507,3 +507,76 @@ body {
 .modal-submit:hover { background: var(--accent-hover); }
 .modal-submit:active { transform: scale(0.97); }
 .modal-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── GATE ── */
+.violations-locked {
+  max-height: 310px;
+  overflow: hidden;
+  position: relative;
+}
+
+.violations-locked::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 180px;
+  background: linear-gradient(to bottom, transparent, #ffffff);
+  pointer-events: none;
+}
+
+.gate-card {
+  text-align: center;
+  background: #fff;
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  padding: 40px 24px 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 32px rgba(192, 57, 43, 0.12);
+}
+
+.gate-icon { font-size: 2.8rem; margin-bottom: 14px; }
+
+.gate-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.gate-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.gate-btn {
+  display: inline-block;
+  padding: 15px 40px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-bottom: 20px;
+}
+
+.gate-btn:hover { background: var(--accent-hover); }
+.gate-btn:active { transform: scale(0.97); }
+
+.gate-features {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.gate-features span { display: flex; align-items: center; gap: 4px; }
