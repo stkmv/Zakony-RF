@@ -129,7 +129,7 @@ app.post('/api/lead', async (req, res) => {
 
   if (!token || !chatId) return res.status(500).json({ error: 'Telegram не настроен' });
 
-  const text = `📋 Новая заявка с LawScan\n👤 Имя: ${name || '—'}\n📞 Телефон: ${phone || '—'}\n🌐 Сайт: ${url || '—'}`;
+  const text = `📋 Новая заявка с ЗаконоСкан\n👤 Имя: ${name || '—'}\n📞 Телефон: ${phone || '—'}\n🌐 Сайт: ${url || '—'}`;
 
   try {
     const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
