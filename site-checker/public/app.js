@@ -192,7 +192,66 @@ function formatMoney(n) {
   return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(n);
 }
 
-async function downloadPDF() {
+function downloadPDF() {
+  document.getElementById('leadName').value = '';
+  document.getElementById('leadPhone').value = '';
+  document.getElementById('leadError').style.display = 'none';
+  document.getElementById('leadModal').style.display = 'flex';
+
+  document.getElementById('leadPhone').oninput = function(e) {
+    let digits = e.target.value.replace(/\D/g, '');
+    if (digits.startsWith('8')) digits = '7' + digits.slice(1);
+    if (!digits.startsWith('7')) digits = digits ? '7' + digits : '7';
+    let result = '+7';
+    if (digits.length > 1) result += ' (' + digits.slice(1, 4);
+    if (digits.length >= 4) result += ') ' + digits.slice(4, 7);
+    if (digits.length >= 7) result += '-' + digits.slice(7, 9);
+    if (digits.length >= 9) result += '-' + digits.slice(9, 11);
+    e.target.value = result;
+  };
+}
+
+function handleModalOverlayClick(e) {
+  if (e.target === document.getElementById('leadModal')) {
+    document.getElementById('leadModal').style.display = 'none';
+  }
+}
+
+async function submitLead() {
+  const name = document.getElementById('leadName').value.trim();
+  const phone = document.getElementById('leadPhone').value.trim();
+  const btn = document.getElementById('leadSubmitBtn');
+
+  if (!name) { showLeadError('Введите ваше имя'); return; }
+  if (phone.replace(/\D/g, '').length < 11) { showLeadError('Введите полный номер телефона'); return; }
+
+  btn.textContent = '⏳ Отправляем...';
+  btn.disabled = true;
+  document.getElementById('leadError').style.display = 'none';
+
+  try {
+    const url = document.getElementById('urlInput').value || '';
+    await fetch('/api/lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, url })
+    });
+  } catch (e) {}
+
+  document.getElementById('leadModal').style.display = 'none';
+  btn.textContent = 'Получить отчёт ⬇';
+  btn.disabled = false;
+
+  await generateAndDownloadPDF();
+}
+
+function showLeadError(msg) {
+  const el = document.getElementById('leadError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function generateAndDownloadPDF() {
   const btn = document.getElementById('downloadPdfBtn');
   btn.textContent = '⏳ Формируем PDF...';
   btn.disabled = true;

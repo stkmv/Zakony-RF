@@ -122,6 +122,29 @@ app.post('/api/check', async (req, res) => {
   }
 });
 
+app.post('/api/lead', async (req, res) => {
+  const { name, phone, url } = req.body;
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!token || !chatId) return res.status(500).json({ error: 'Telegram не настроен' });
+
+  const text = `📋 Новая заявка с LawScan\n👤 Имя: ${name || '—'}\n📞 Телефон: ${phone || '—'}\n🌐 Сайт: ${url || '—'}`;
+
+  try {
+    const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text })
+    });
+    const tgData = await tgRes.json();
+    if (!tgData.ok) throw new Error(tgData.description);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`LawScan сервер запущен: http://localhost:${PORT}`);

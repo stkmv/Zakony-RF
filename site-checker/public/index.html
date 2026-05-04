@@ -72,6 +72,19 @@
     <p>Актуально на апрель 2026 г. · При изменении законодательства данные обновляются.</p>
   </footer>
 
+  <div class="modal-overlay" id="leadModal" style="display:none" onclick="handleModalOverlayClick(event)">
+    <div class="modal-box">
+      <h3 class="modal-title">Скачать PDF-отчёт</h3>
+      <p class="modal-subtitle">Оставьте контакты — и сразу получите отчёт о нарушениях</p>
+      <div class="modal-form">
+        <input type="text" id="leadName" class="modal-input" placeholder="Ваше имя">
+        <input type="tel" id="leadPhone" class="modal-input" placeholder="+7 (___) ___-__-__">
+        <div class="modal-error" id="leadError" style="display:none"></div>
+        <button class="modal-submit" id="leadSubmitBtn" onclick="submitLead()">Получить отчёт ⬇</button>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
