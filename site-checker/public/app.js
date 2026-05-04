@@ -256,6 +256,8 @@ async function generateAndDownloadPDF() {
   btn.textContent = '⏳ Формируем PDF...';
   btn.disabled = true;
 
+  const slot = document.getElementById('pdfResultsSlot');
+
   try {
     if (!window.html2canvas) {
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
@@ -264,16 +266,23 @@ async function generateAndDownloadPDF() {
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
     }
 
-    btn.style.visibility = 'hidden';
+    // Клонируем результаты в PDF-контейнер с реквизитами
+    const resultsEl = document.getElementById('resultsSection');
+    const clone = resultsEl.cloneNode(true);
+    const cloneBtn = clone.querySelector('#downloadPdfBtn');
+    if (cloneBtn) cloneBtn.style.display = 'none';
+    slot.innerHTML = '';
+    slot.appendChild(clone);
 
-    const section = document.getElementById('resultsSection');
-    const canvas = await html2canvas(section, {
+    const pdfDoc = document.getElementById('pdfDocument');
+    const canvas = await html2canvas(pdfDoc, {
       scale: 2,
       useCORS: true,
-      backgroundColor: '#f8fafc'
+      backgroundColor: '#ffffff',
+      width: 860
     });
 
-    btn.style.visibility = '';
+    slot.innerHTML = '';
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
@@ -302,11 +311,11 @@ async function generateAndDownloadPDF() {
     pdf.save(`ZakonoScan_${host}_${date}.pdf`);
 
   } catch (err) {
+    slot.innerHTML = '';
     alert('Не удалось создать PDF: ' + err.message);
   } finally {
     btn.textContent = '⬇ Скачать PDF';
     btn.disabled = false;
-    btn.style.visibility = '';
   }
 }
 
