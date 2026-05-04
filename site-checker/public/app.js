@@ -303,17 +303,31 @@ async function generateAndDownloadPDF() {
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
     }
 
-    // Клонируем результаты в PDF-контейнер с реквизитами
     const resultsEl = document.getElementById('resultsSection');
     const clone = resultsEl.cloneNode(true);
     const cloneBtn = clone.querySelector('#downloadPdfBtn');
     if (cloneBtn) cloneBtn.style.display = 'none';
+    // Снимаем ограничение высоты для PDF
+    const cloneViolList = clone.querySelector('#violationsList');
+    if (cloneViolList) cloneViolList.classList.remove('violations-locked');
     slot.innerHTML = '';
     slot.appendChild(clone);
 
-    const pdfDoc = document.getElementById('pdfDocument');
-    const canvas = await html2canvas(pdfDoc, {
-      scale: 2,
+    const pdfDocEl = document.getElementById('pdfDocument');
+    const SCALE = 2;
+
+    // Запоминаем позиции карточек ДО захвата canvas
+    const pdfDocRect = pdfDocEl.getBoundingClientRect();
+    const cardRects = [...pdfDocEl.querySelectorAll('.violation-card, .passed-item, .preliminary-note')].map(el => {
+      const r = el.getBoundingClientRect();
+      return {
+        top: Math.round((r.top - pdfDocRect.top) * SCALE),
+        bottom: Math.round((r.bottom - pdfDocRect.top) * SCALE)
+      };
+    });
+
+    const canvas = await html2canvas(pdfDocEl, {
+      scale: SCALE,
       useCORS: true,
       backgroundColor: '#ffffff',
       width: 860
@@ -323,23 +337,46 @@ async function generateAndDownloadPDF() {
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
-
     const margin = 10;
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
     const contentW = pageW - margin * 2;
-    const contentH = (canvas.height * contentW) / canvas.width;
-    const totalPages = Math.ceil(contentH / (pageH - margin * 2));
 
-    for (let i = 0; i < totalPages; i++) {
+    // Высота одной страницы в пикселях canvas
+    const pageHpx = Math.round((pageH - margin * 2) * canvas.width / contentW);
+
+    // Умные точки разрыва — не режем внутри карточек
+    const cuts = [0];
+    let nextCut = pageHpx;
+    while (nextCut < canvas.height) {
+      let cut = nextCut;
+      for (const c of cardRects) {
+        if (c.top < nextCut && c.bottom > nextCut) {
+          // Режем перед карточкой, а не сквозь неё
+          cut = Math.max(c.top - SCALE * 12, cuts[cuts.length - 1] + 1);
+          break;
+        }
+      }
+      cuts.push(cut);
+      nextCut = cut + pageHpx;
+    }
+    cuts.push(canvas.height);
+
+    for (let i = 0; i < cuts.length - 1; i++) {
       if (i > 0) pdf.addPage();
-      pdf.addImage(
-        canvas.toDataURL('image/png'), 'PNG',
-        margin,
-        margin - i * (pageH - margin * 2),
-        contentW,
-        contentH
-      );
+      const y0 = cuts[i];
+      const sliceH = cuts[i + 1] - y0;
+
+      const tmp = document.createElement('canvas');
+      tmp.width = canvas.width;
+      tmp.height = sliceH;
+      const ctx = tmp.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, tmp.width, tmp.height);
+      ctx.drawImage(canvas, 0, y0, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+
+      const sliceH_mm = sliceH * contentW / canvas.width;
+      pdf.addImage(tmp.toDataURL('image/png'), 'PNG', margin, margin, contentW, sliceH_mm);
     }
 
     const rawUrl = document.getElementById('urlInput').value || 'site';
