@@ -299,7 +299,7 @@ async function generateAndDownloadPDF() {
     const rawUrl = document.getElementById('urlInput').value || 'site';
     const host = rawUrl.replace(/https?:\/\//, '').replace(/[\/\\?#]/g, '_').slice(0, 30);
     const date = new Date().toISOString().slice(0, 10);
-    pdf.save(`LawScan_${host}_${date}.pdf`);
+    pdf.save(`ZakonoScan_${host}_${date}.pdf`);
 
   } catch (err) {
     alert('Не удалось создать PDF: ' + err.message);
