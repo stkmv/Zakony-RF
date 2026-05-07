@@ -124,25 +124,40 @@ app.post('/api/check', async (req, res) => {
 
 app.post('/api/lead', async (req, res) => {
   const { name, phone, url } = req.body;
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-
-  if (!token || !chatId) return res.status(500).json({ error: 'Telegram не настроен' });
-
   const text = `📋 Новая заявка с ЗаконоСкан\n👤 Имя: ${name || '—'}\n📞 Телефон: ${phone || '—'}\n🌐 Сайт: ${url || '—'}`;
 
-  try {
-    const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text })
-    });
-    const tgData = await tgRes.json();
-    if (!tgData.ok) throw new Error(tgData.description);
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  const sends = [];
+
+  const tgToken = process.env.TELEGRAM_BOT_TOKEN;
+  const tgChatId = process.env.TELEGRAM_CHAT_ID;
+  if (tgToken && tgChatId) {
+    sends.push(
+      fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: tgChatId, text })
+      }).then(r => r.json()).then(d => { if (!d.ok) throw new Error('Telegram: ' + d.description); })
+    );
   }
+
+  const maxToken = process.env.MAX_BOT_TOKEN;
+  const maxChatId = process.env.MAX_CHAT_ID;
+  if (maxToken && maxChatId) {
+    sends.push(
+      fetch(`https://botapi.max.ru/messages?access_token=${maxToken}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipient: { chat_id: Number(maxChatId) }, text })
+      }).then(r => r.json()).then(d => { if (d.error) throw new Error('Max: ' + d.error); })
+    );
+  }
+
+  if (sends.length === 0) return res.status(500).json({ error: 'Мессенджеры не настроены' });
+
+  const results = await Promise.allSettled(sends);
+  const anyOk = results.some(r => r.status === 'fulfilled');
+  if (anyOk) return res.json({ ok: true });
+  res.status(500).json({ error: results.map(r => r.reason?.message).join('; ') });
 });
 
 const PORT = process.env.PORT || 3000;
