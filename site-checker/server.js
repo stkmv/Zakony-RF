@@ -144,9 +144,9 @@ app.post('/api/lead', async (req, res) => {
   const maxChatId = process.env.MAX_CHAT_ID;
   if (maxToken && maxChatId) {
     sends.push(
-      fetch(`https://botapi.max.ru/messages?access_token=${maxToken}`, {
+      fetch(`https://botapi.max.ru/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${maxToken}` },
         body: JSON.stringify({ recipient: { chat_id: Number(maxChatId) }, text })
       }).then(r => r.json()).then(d => { if (d.error) throw new Error('Max: ' + d.error); })
     );
